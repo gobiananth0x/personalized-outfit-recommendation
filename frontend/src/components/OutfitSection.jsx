@@ -62,9 +62,12 @@ const OutfitSection = () => {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/outfits/generate`,
         {
+          method: "POST",
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
+          body: JSON.stringify({ city: "" }),
         },
       );
       if (!res.ok) throw new Error();
