@@ -17,7 +17,12 @@ class OutfitRecommender:
         """
 
         if request.previous_plan:
-            prompt += f"\nCRITICAL: Do not suggest these combinations again: {request.previous_plan.model_dump_json()}"
+            prompt += f"""CRITICAL - REGENERATION REQUEST:
+            The user did not like the previous plan: {request.previous_plan.model_dump_json()}
+            
+            DO NOT suggest the exact same top-and-bottom pairings for the same days. 
+            Provide a fresh perspective by mixing different items or suggesting new combinations 
+            that were not in the previous plan."""
 
         response = self.client.models.generate_content(
             model="gemini-2.5-flash",

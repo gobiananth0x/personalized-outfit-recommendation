@@ -55,9 +55,23 @@ const OutfitSection = () => {
     return `${day}-${month}-${year}-${weekday}`;
   };
 
+  const hasExistingOutfits = outfits.some((o) => o.top?.id && o.bottom?.id);
+  const isPastWeek =
+    outfits.length > 0 &&
+    outfits[0].date < new Date().toISOString().split("T")[0];
+  const buttonLabel =
+    hasExistingOutfits && !isPastWeek ? "Regenerate" : "Generate";
+
   const handleGenerate = async () => {
     try {
       setGenerating(true);
+      const previousPlanData = outfits
+        .filter((o) => o.top && o.bottom)
+        .map((o) => ({
+          date: o.date,
+          top: o.top,
+          bottom: o.bottom,
+        }));
       setOutfits(buildWeek());
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/outfits/generate`,
@@ -67,7 +81,10 @@ const OutfitSection = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
-          body: JSON.stringify({ city: "" }),
+          body: JSON.stringify({
+            city: "",
+            previous_plan: { plan: previousPlanData },
+          }),
         },
       );
       if (!res.ok) throw new Error();
@@ -149,7 +166,11 @@ const OutfitSection = () => {
         ))}
       </div>
       <div className="outfit-actions">
-        <button className="outfit-action-btn generate" onClick={handleGenerate}>
+        <button
+          className={`outfit-action-btn generate ${buttonLabel.toLowerCase()}`}
+          onClick={handleGenerate}
+          disabled={generating}
+        >
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -158,9 +179,13 @@ const OutfitSection = () => {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            {buttonLabel === "Regenerate" ? (
+              <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+            ) : (
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            )}
           </svg>
-          Generate
+          {buttonLabel}
         </button>
         <button
           className="outfit-action-btn save"
