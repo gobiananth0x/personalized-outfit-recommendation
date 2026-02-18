@@ -117,7 +117,7 @@ async def generate_outfits(
 ):
     city: Optional[str] = request.city
     outfit_inventory = (
-        db.query(models.ClothingItem).filter_by(user_id=current_user.id).all()
+        db.query(models.ClothingItem).filter_by(user_id=current_user.id, is_available=True).all()
     )
     if not outfit_inventory:
         raise HTTPException(

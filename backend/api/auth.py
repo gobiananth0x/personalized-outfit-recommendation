@@ -96,12 +96,16 @@ def google_login(data: GoogleAuthRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid Google code")
     email = idinfo.get("email")
     name = idinfo.get("name")
+    picture = idinfo.get("picture")
     if not email:
         raise HTTPException(status_code=400, detail="Email not found")
     user = db.query(models.User).filter_by(email=email).first()
     if not user:
-        user = models.User(email=email, name=name)
+        user = models.User(email=email, name=name, picture=picture)
         db.add(user)
+    else:
+        user.name = name
+        user.picture = picture
     if credentials.refresh_token:
         user.google_refresh_token = credentials.refresh_token
     db.commit()

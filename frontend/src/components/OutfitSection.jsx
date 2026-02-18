@@ -6,6 +6,7 @@ import { FadeLoader } from "react-spinners";
 const OutfitSection = () => {
   const [outfits, setOutfits] = useState([]);
   const [generating, setGenerating] = useState(false);
+  const [city, setCity] = useState("");
 
   const buildWeek = () => {
     const today = new Date();
@@ -59,6 +60,18 @@ const OutfitSection = () => {
     try {
       setGenerating(true);
       setOutfits(buildWeek());
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+          );
+          const city = await res.json();
+          setCity(
+            data.address.city || data.address.town || data.address.village,
+          );
+        });
+      }
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/outfits/generate`,
         {
@@ -67,7 +80,7 @@ const OutfitSection = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
-          body: JSON.stringify({ city: "" }),
+          body: JSON.stringify({ city: city }),
         },
       );
       if (!res.ok) throw new Error();
@@ -149,7 +162,11 @@ const OutfitSection = () => {
         ))}
       </div>
       <div className="outfit-actions">
-        <button className="outfit-action-btn generate" onClick={handleGenerate}>
+        <button
+          className="outfit-action-btn generate"
+          onClick={handleGenerate}
+          disabled={generating}
+        >
           <svg
             viewBox="0 0 24 24"
             fill="none"
