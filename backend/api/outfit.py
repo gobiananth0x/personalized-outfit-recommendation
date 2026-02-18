@@ -164,4 +164,6 @@ async def generate_outfits(
             outfit.date = today + timedelta(days=i)
         return recommendation.plan
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gemini Error: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to generate outfits: {str(e)}"
+        )
