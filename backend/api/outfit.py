@@ -109,7 +109,8 @@ def get_week_outfits(
     return outfits
 
 
-@router.post("/generate", response_model=List[OutfitBase])
+@router.post("/generate", response_model=List[RecommendationRequest
+             ])
 async def generate_outfits(
     request: RecommendationRequest,
     db: Session = Depends(get_db),
